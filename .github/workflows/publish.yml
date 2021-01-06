@@ -1,0 +1,91 @@
+# https://github.com/marketplace/actions/build-and-push-docker-images
+# https://github.com/actions/create-release
+
+# https://github.com/themakers/protoc/actions
+# https://hub.docker.com/repository/docker/themakers/protoc
+
+
+name: Publish Docker image
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  #   branches: [master]
+  # release:
+  #   types: [published]
+jobs:
+  push_to_registry:
+    name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v2
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      # - name: Login to GitHub Container Registry
+      #   uses: docker/login-action@v1 
+      #   with:
+      #     registry: ghcr.io
+      #     username: ${{ github.repository_owner }}
+      #     password: ${{ secrets.CR_PAT }}
+      - name: Push to Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+          context: ./context
+          file: ./Dockerfile
+          platforms: linux/amd64
+          # tags: "themakers/protoc:${{ github.event.release.tag_name }}"
+          tags: |
+            themakers/protoc:${{ steps.get_version.outputs.VERSION }}
+            themakers/protoc:latest
+          push: true
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          repository: themakers/protoc
+          tag_with_ref: true
+      # - name: Push to GitHub Packages
+      #   uses: docker/build-push-action@v2
+      #   with:
+      #     context: ./context
+      #     file: ./Dockerfile
+      #     platforms: linux/amd64
+      #     username: ${{ github.actor }}
+      #     password: ${{ secrets.GITHUB_TOKEN }}
+      #     registry: docker.pkg.github.com
+      #     repository: themakers/protoc/protoc
+      #     tag_with_ref: true
+
+
+
+# on:
+#   push:
+#     tags:
+#       - '**'
+# name: Create Release
+# jobs:
+#   build:
+#     name: Create Release
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v2
+#       - name: Create Release
+#         id: create_release
+#         uses: actions/create-release@v1
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#         with:
+#           tag_name: ${{ github.ref }}
+#           release_name: Release ${{ github.ref }}
+#           draft: false
+#           prerelease: false

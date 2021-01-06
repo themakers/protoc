@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+export PATH="/protoc/bin:$PATH"
+
+protoc -I/protoc/include -I/mnt $@
