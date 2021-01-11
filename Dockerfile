@@ -66,8 +66,6 @@ RUN \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-RUN tree .
-
 RUN npm install
 
 RUN \
@@ -75,11 +73,7 @@ RUN \
     && ln -s /protoc/pbjs /bin/pbjs \
     && ln -s /protoc/pbts /bin/pbts
 
-RUN tree .
-
 RUN npm run install-hack
-
-RUN tree .
 
 WORKDIR /mnt
 
