@@ -1,5 +1,6 @@
 ARG PROTOC_VERSION=3.14.0
 ARG PROTOC_GEN_GO_VERSION=1.25.0
+ARG PROTOC_GEN_GO_GRPC_VERSION=1.34.0
 
 
 ################################################################
@@ -34,11 +35,15 @@ WORKDIR /protoc
 RUN go mod init example.com/mod
 
 ARG PROTOC_GEN_GO_VERSION
+ARG PROTOC_GEN_GO_GRPC_VERSION
 
 RUN go get -v -d google.golang.org/protobuf/cmd/protoc-gen-go@v${PROTOC_GEN_GO_VERSION}
 
 RUN go build -x -o /protoc/protoc-gen-go google.golang.org/protobuf/cmd/protoc-gen-go
 
+RUN go get -v -d google.golang.org/grpc@v${PROTOC_GEN_GO_GRPC_VERSION}
+
+RUN go build -x -o /protoc/protoc-gen-go-grpc google.golang.org/grpc/cmd/protoc-gen-go-grpc
 
 ################################################################
 #### Merge container
@@ -47,6 +52,7 @@ FROM debian:buster as merge
 
 COPY --from=protoc /protoc /protoc
 COPY --from=protoc-go /protoc/protoc-gen-go /protoc/bin/protoc-gen-go
+COPY --from=protoc-go /protoc/protoc-gen-go-grpc /protoc/bin/protoc-gen-go-grpc
 COPY / /protoc
 
 
