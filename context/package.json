@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "protobufjs": "~6.10.2"
+  },
+  "scripts": {
+    "install-hack": "pbjs | true"
+  }
+}

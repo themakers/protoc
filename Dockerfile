@@ -11,7 +11,7 @@ WORKDIR /protoc
 RUN \
     apt-get update \
     && apt-get install -y \
-        wget tree unzip \
+        wget unzip \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -22,7 +22,7 @@ RUN wget https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC
 
 RUN unzip ${PROTOC_ARCHIVE} -d /protoc
 
-RUN tree /protoc
+RUN rm ${PROTOC_ARCHIVE}
 
 
 ################################################################
@@ -47,17 +47,41 @@ FROM debian:buster as merge
 
 COPY --from=protoc /protoc /protoc
 COPY --from=protoc-go /protoc/protoc-gen-go /protoc/bin/protoc-gen-go
-COPY /protoc /protoc/protoc
+COPY / /protoc
 
 
 ################################################################
-#### Final one-layer container
+#### Final container
 FROM debian:buster
+
+
+WORKDIR /protoc
+
+COPY --from=merge /protoc /protoc
+RUN \
+    apt-get update \
+    && apt-get install -y curl tree \
+    && curl -sL https://deb.nodesource.com/setup_12.x | bash - \
+    && apt-get install -y nodejs \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN tree .
+
+RUN npm install
+
+RUN \
+    ln -s /protoc/protoc /bin/protoc \
+    && ln -s /protoc/pbjs /bin/pbjs \
+    && ln -s /protoc/pbts /bin/pbts
+
+RUN tree .
+
+RUN npm run install-hack
+
+RUN tree .
 
 WORKDIR /mnt
 
-COPY --from=merge /protoc /protoc
-# RUN ln -s /protoc/protoc /bin/protoc
-
-ENTRYPOINT [ "/protoc/protoc" ]
-CMD [ "--help" ]
+#ENTRYPOINT [ "/protoc/protoc" ]
+#CMD [ "--help" ]
