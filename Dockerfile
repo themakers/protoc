@@ -1,7 +1,16 @@
+# https://github.com/protocolbuffers/protobuf/releases/
 ARG PROTOC_VERSION=3.14.0
+
+# https://github.com/protocolbuffers/protobuf-go/tags
 ARG PROTOC_GEN_GO_VERSION=1.25.0
+
+# https://github.com/grpc/grpc-go/tags
 ARG PROTOC_GEN_GO_GRPC_VERSION=1.34.0
 
+# https://github.com/grpc/grpc-web/releases
+ARG PROTOC_GEN_GRPC_WEB_VERSION=1.2.1
+
+# https://github.com/protobufjs/protobuf.js/tags
 
 ################################################################
 #### protoc container
@@ -25,6 +34,9 @@ RUN unzip ${PROTOC_ARCHIVE} -d /protoc
 
 RUN rm ${PROTOC_ARCHIVE}
 
+ARG PROTOC_GEN_GRPC_WEB_VERSION
+RUN wget -O /protoc/bin/protoc-gen-grpc-web https://github.com/grpc/grpc-web/releases/download/${PROTOC_GEN_GRPC_WEB_VERSION}/protoc-gen-grpc-web-${PROTOC_GEN_GRPC_WEB_VERSION}-linux-x86_64
+RUN chmod +x /protoc/bin/protoc-gen-grpc-web
 
 ################################################################
 #### golang plugin container
@@ -48,7 +60,6 @@ RUN go build -x -o /protoc/protoc-gen-go-grpc google.golang.org/grpc/cmd/protoc-
 ################################################################
 #### Merge container
 FROM debian:buster as merge
-
 
 COPY --from=protoc /protoc /protoc
 COPY --from=protoc-go /protoc/protoc-gen-go /protoc/bin/protoc-gen-go
