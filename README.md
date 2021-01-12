@@ -9,6 +9,8 @@ What's in the package:
 Mount your project directory into the container's `/mnt`
 
 
+- [ ] TODO: Multiple architectures
+- [ ] TODO: Publish to GitHub's registries
 - [ ] TODO: squash final image
 - [ ] TODO: [grpc-gateway](https://github.com/grpc-ecosystem/grpc-gateway)
 
