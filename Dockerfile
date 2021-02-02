@@ -57,6 +57,10 @@ RUN go get -v -d google.golang.org/grpc@v${PROTOC_GEN_GO_GRPC_VERSION}
 
 RUN go build -x -o /protoc/protoc-gen-go-grpc google.golang.org/grpc/cmd/protoc-gen-go-grpc
 
+RUN go get -v -d github.com/go-bindata/go-bindata/v3@771f8d80059ec9d4244d7c6b6d8f22d97b9f74a6
+
+RUN go build -x -o /protoc/go-bindata github.com/go-bindata/go-bindata/v3/go-bindata
+
 ################################################################
 #### Merge container
 FROM debian:buster as merge
@@ -64,6 +68,7 @@ FROM debian:buster as merge
 COPY --from=protoc /protoc /protoc
 COPY --from=protoc-go /protoc/protoc-gen-go /protoc/bin/protoc-gen-go
 COPY --from=protoc-go /protoc/protoc-gen-go-grpc /protoc/bin/protoc-gen-go-grpc
+COPY --from=protoc-go /protoc/go-bindata /protoc/bin/go-bindata
 COPY / /protoc
 
 
@@ -87,6 +92,7 @@ RUN npm install
 
 RUN \
     ln -s /protoc/protoc /bin/protoc \
+    && ln -s /protoc/bin/go-bindata /bin/go-bindata \
     && ln -s /protoc/pbjs /bin/pbjs \
     && ln -s /protoc/pbts /bin/pbts
 
