@@ -1,11 +1,14 @@
 # https://github.com/protocolbuffers/protobuf/releases/
-ARG PROTOC_VERSION=3.14.0
+ARG PROTOC_VERSION=3.17.3
 
 # https://github.com/protocolbuffers/protobuf-go/tags
-ARG PROTOC_GEN_GO_VERSION=1.25.0
+ARG PROTOC_GEN_GO_VERSION=1.27.1
 
 # https://github.com/grpc/grpc-go/tags
-ARG PROTOC_GEN_GO_GRPC_VERSION=1.34.0
+ARG PROTOC_GRPC_VERSION=1.39.0
+
+#
+ARG PROTOC_GEN_GO_GRPC_VERSION=1.1.0
 
 # https://github.com/grpc/grpc-web/releases
 ARG PROTOC_GEN_GRPC_WEB_VERSION=1.2.1
@@ -53,13 +56,10 @@ RUN go get -v -d google.golang.org/protobuf/cmd/protoc-gen-go@v${PROTOC_GEN_GO_V
 
 RUN go build -x -o /protoc/protoc-gen-go google.golang.org/protobuf/cmd/protoc-gen-go
 
-RUN go get -v -d google.golang.org/grpc@v${PROTOC_GEN_GO_GRPC_VERSION}
+#RUN go get -v -d google.golang.org/grpc@v${PROTOC_GRPC_VERSION}
 
-RUN go build -x -o /protoc/protoc-gen-go-grpc google.golang.org/grpc/cmd/protoc-gen-go-grpc
+RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v${PROTOC_GEN_GO_GRPC_VERSION}
 
-RUN go get -v -d github.com/go-bindata/go-bindata/v3@771f8d80059ec9d4244d7c6b6d8f22d97b9f74a6
-
-RUN go build -x -o /protoc/go-bindata github.com/go-bindata/go-bindata/v3/go-bindata
 
 ################################################################
 #### Merge container
@@ -67,15 +67,13 @@ FROM debian:buster as merge
 
 COPY --from=protoc /protoc /protoc
 COPY --from=protoc-go /protoc/protoc-gen-go /protoc/bin/protoc-gen-go
-COPY --from=protoc-go /protoc/protoc-gen-go-grpc /protoc/bin/protoc-gen-go-grpc
-COPY --from=protoc-go /protoc/go-bindata /protoc/bin/go-bindata
+COPY --from=protoc-go /go/bin/protoc-gen-go-grpc /protoc/bin/protoc-gen-go-grpc
 COPY / /protoc
 
 
 ################################################################
 #### Final container
 FROM debian:buster
-
 
 WORKDIR /protoc
 
@@ -91,10 +89,13 @@ RUN \
 RUN npm install
 
 RUN \
-    ln -s /protoc/protoc /bin/protoc \
-    && ln -s /protoc/bin/go-bindata /bin/go-bindata \
-    && ln -s /protoc/pbjs /bin/pbjs \
-    && ln -s /protoc/pbts /bin/pbts
+    ln -s /protoc/protoc /bin/protoc && \
+    ln -s /protoc/bin/protoc-gen-go-grpc /bin/protoc-gen-go-grpc && \
+    ln -s /protoc/protoc-gen-go /bin/protoc-gen-go && \
+    ln -s /protoc/pbjs /bin/pbjs && \
+    ln -s /protoc/pbts /bin/pbts
+
+RUN chmod -R 0777 /protoc
 
 RUN npm run install-hack
 

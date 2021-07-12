@@ -3,4 +3,4 @@ set -e -x
 
 export PATH="/protoc/bin:$PATH"
 
-protoc -I/protoc/include -I/mnt "$@"
+exec /protoc/bin/protoc -I/protoc/include -I/mnt "$@"
