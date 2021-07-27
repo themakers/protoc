@@ -9,7 +9,7 @@ build:
 	docker build --rm --progress=plain --file Dockerfile --tag themakers/protoc:latest context
 
 run: build
-	docker run --rm -it themakers/protoc:latest protoc --help
+	docker run --rm -it themakers/protoc:latest /bin/bash
 
 publish: build
 	docker image push themakers/protoc:latest

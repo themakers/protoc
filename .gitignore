@@ -2,4 +2,3 @@
 *.iml
 
 /context/node_modules
-/context/package-lock.json

@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
 set -e -x
 
-export PATH="/protoc/node_modules/.bin:$PATH"
-
-pbjs --path=/protoc/include --path=/mnt $@
+exec /protoc/node_modules/.bin/pbjs --path=/protoc/include --path=/mnt "$@"

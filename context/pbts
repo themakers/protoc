@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
 set -e -x
 
-export PATH="/protoc/node_modules/.bin:$PATH"
-
-pbts $@
+exec /protoc/node_modules/.bin/pbts "$@"

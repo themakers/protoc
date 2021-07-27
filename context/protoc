@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
 set -e -x
 
-export PATH="/protoc/bin:$PATH"
-
-exec /protoc/bin/protoc -I/protoc/include -I/mnt "$@"
+exec /bin/protoc-original -I/mnt -I/protoc/include -I/protoc/googleapis "$@"
