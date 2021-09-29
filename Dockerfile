@@ -82,6 +82,7 @@ RUN \
     mv /protoc/bin/* /bin/   &&\
     mv /protoc/protoc /bin/   &&\
     ln -s /protoc/node_modules/.bin/protoc-gen-ts /bin/   &&\
+    ln -s /protoc/node_modules/.bin/protoc-gen-ts_proto /bin/   &&\
     ln -s /protoc/pbjs /bin/pbjs   &&\
     ln -s /protoc/pbts /bin/pbts
 
