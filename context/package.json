@@ -1,7 +1,7 @@
 {
   "dependencies": {
-    "protobufjs": "~6.10.2",
-    "ts-proto": "^1.82.5",
+    "protobufjs": "~6.11.3",
+    "ts-proto": "^1.112.2",
     "ts-protoc-gen": "^0.15.0"
   },
   "scripts": {
