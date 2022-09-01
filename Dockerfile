@@ -1,6 +1,8 @@
 ################################################################
 #### protoc container
-FROM golang:1.18-buster as protoc
+FROM golang:1.19-bullseye as protoc
+
+ARG TARGETARCH
 
 WORKDIR /protoc
 
@@ -8,11 +10,6 @@ WORKDIR /protoc
 ####  protoc + protoc-gen-grpc-web
 ####
 
-# https://github.com/protocolbuffers/protobuf/releases/
-ARG PROTOC_VERSION=21.0-rc-2
-ARG PROTOC_VERSION_GITHUB_RELEASE=v21.0-rc2
-
-ARG PROTOC_GEN_GRPC_WEB_VERSION=1.3.1
 
 RUN \
     apt-get update \
@@ -21,16 +18,34 @@ RUN \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# https://github.com/protocolbuffers/protobuf/releases/
+ARG PROTOC_VERSION=21.5
+ARG PROTOC_VERSION_GITHUB_RELEASE=v21.5
+
+ARG PROTOC_GEN_GRPC_WEB_VERSION=1.3.1
+
 ARG PROTOC_VERSION
 
-ARG PROTOC_ARCHIVE=protoc-${PROTOC_VERSION}-linux-x86_64.zip
-RUN wget https://github.com/protocolbuffers/protobuf/releases/download/${PROTOC_VERSION_GITHUB_RELEASE}/${PROTOC_ARCHIVE}
-RUN unzip ${PROTOC_ARCHIVE} -d /protoc
+RUN \
+    case $TARGETARCH in \
+      amd64) \
+        export PROTOC_ARCH=x86_64 \
+        ;; \
+      arm64) \
+        export PROTOC_ARCH=aarch_64 \
+        ;; \
+      *) \
+        echo "Unsupported architecture >$TARGETARCH<" &&\
+        exit 1 \
+        ;; \
+    esac &&\
+    export PROTOC_ARCHIVE=protoc-${PROTOC_VERSION}-linux-${PROTOC_ARCH}.zip &&\
+    wget https://github.com/protocolbuffers/protobuf/releases/download/${PROTOC_VERSION_GITHUB_RELEASE}/${PROTOC_ARCHIVE} &&\
+    unzip ${PROTOC_ARCHIVE} -d /protoc &&\
+    rm ${PROTOC_ARCHIVE}
 
 # https://github.com/protocolbuffers/protobuf/releases/download/v21.0-rc-2/protoc-21.0-rc-2-linux-x86_64.zip
 # https://github.com/protocolbuffers/protobuf/releases/download/v21.0-rc2/protoc-21.0-rc-2-linux-x86_64.zip
-
-RUN rm ${PROTOC_ARCHIVE}
 
 ARG PROTOC_GEN_GRPC_WEB_VERSION
 RUN wget -O /protoc/bin/protoc-gen-grpc-web https://github.com/grpc/grpc-web/releases/download/${PROTOC_GEN_GRPC_WEB_VERSION}/protoc-gen-grpc-web-${PROTOC_GEN_GRPC_WEB_VERSION}-linux-x86_64
@@ -60,7 +75,7 @@ RUN go install \
 
 ################################################################
 #### Final container
-FROM debian:buster
+FROM debian:bullseye
 
 WORKDIR /protoc
 

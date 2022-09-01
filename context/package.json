@@ -1,8 +1,8 @@
 {
   "dependencies": {
-    "protobufjs": "~6.11.3",
-    "ts-proto": "^1.112.2",
-    "ts-protoc-gen": "^0.15.0"
+    "protobufjs": "6.11.3",
+    "ts-proto": "v1.123.1",
+    "ts-protoc-gen": "0.15.0"
   },
   "scripts": {
     "install-hack": "pbjs | true"
