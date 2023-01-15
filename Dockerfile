@@ -96,10 +96,7 @@ RUN \
     npm install &&\
     npm run install-hack &&\
     \
-    chmod -R +x /protoc/bin &&\
-    ls -la /protoc/bin/
-
-RUN \
+    chmod -R +x /protoc/bin  &&\
     mv /protoc/bin/protoc /protoc/bin/protoc-original   &&\
     mv /protoc/bin/* /bin/    &&\
     mv /protoc/protoc /bin/   &&\
@@ -110,5 +107,7 @@ RUN \
     ln -s /protoc/pbts /bin/pbts   &&\
     \
     chmod -R 0777 /protoc
+
+# https://superuser.com/questions/1409618/renaming-a-file-with-mv-cannot-move-to-a-subdirectory-of-itself
 
 WORKDIR /mnt
