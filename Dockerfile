@@ -2,6 +2,7 @@
 #### protoc container
 FROM golang:1.19-bullseye as protoc
 
+ENV DEBIAN_FRONTEND noninteractive
 ARG TARGETARCH
 
 WORKDIR /protoc
@@ -9,7 +10,6 @@ WORKDIR /protoc
 ####
 ####  protoc + protoc-gen-grpc-web
 ####
-
 
 RUN \
     apt-get update \
@@ -19,10 +19,10 @@ RUN \
     && rm -rf /var/lib/apt/lists/*
 
 # https://github.com/protocolbuffers/protobuf/releases/
-ARG PROTOC_VERSION=21.5
-ARG PROTOC_VERSION_GITHUB_RELEASE=v21.5
+ARG PROTOC_VERSION=21.12
+ARG PROTOC_VERSION_GITHUB_RELEASE=v21.12
 
-ARG PROTOC_GEN_GRPC_WEB_VERSION=1.3.1
+ARG PROTOC_GEN_GRPC_WEB_VERSION=1.4.2
 
 ARG PROTOC_VERSION
 
@@ -57,7 +57,9 @@ RUN chmod +x /protoc/bin/protoc-gen-grpc-web
 
 COPY / /protoc
 
-RUN git clone https://github.com/googleapis/googleapis.git /protoc/googleapis
+RUN \
+    git clone https://github.com/googleapis/googleapis.git --branch master --single-branch /protoc/googleapis &&\
+    rm -rf /protoc/googleapis/.git
 
 ENV GOBIN=/protoc/bin/
 RUN go install \
@@ -68,6 +70,7 @@ RUN go install \
         github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc \
         \
         github.com/bufbuild/buf/cmd/buf \
+        github.com/bufbuild/connect-go/cmd/protoc-gen-connect-go \
         github.com/bufbuild/buf/cmd/protoc-gen-buf-breaking \
         github.com/bufbuild/buf/cmd/protoc-gen-buf-lint
 
@@ -76,34 +79,36 @@ RUN go install \
 ################################################################
 #### Final container
 FROM debian:bullseye
+ENV DEBIAN_FRONTEND noninteractive
 
 WORKDIR /protoc
 
 COPY --from=protoc /protoc /protoc
 
 RUN \
-    apt-get update \
-    && apt-get install -y curl tree \
-    && curl -sL https://deb.nodesource.com/setup_16.x | bash - \
-    && apt-get install -y nodejs mc \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-RUN npm install
-RUN npm run install-hack
-
-RUN chmod -R +x /protoc/bin
-
-RUN ls -la /protoc/bin/
+    apt-get update &&\
+    apt-get install -y curl clang-format &&\
+    curl -sL https://deb.nodesource.com/setup_16.x | bash - &&\
+    apt-get install -y nodejs &&\
+    apt-get clean &&\
+    rm -rf /var/lib/apt/lists/* &&\
+    \
+    npm install &&\
+    npm run install-hack &&\
+    \
+    chmod -R +x /protoc/bin &&\
+    ls -la /protoc/bin/
 
 RUN \
     mv /protoc/bin/protoc /protoc/bin/protoc-original   &&\
-    mv /protoc/bin/* /bin/   &&\
+    mv /protoc/bin/* /bin/    &&\
     mv /protoc/protoc /bin/   &&\
-    ln -s /protoc/node_modules/.bin/protoc-gen-ts /bin/   &&\
-    ln -s /protoc/node_modules/.bin/protoc-gen-ts_proto /bin/   &&\
+    ln -s /protoc/node_modules/.bin/protoc-gen-connect-web /bin/   &&\
+    ln -s /protoc/node_modules/.bin/protoc-gen-ts /bin/            &&\
+    ln -s /protoc/node_modules/.bin/protoc-gen-ts_proto /bin/      &&\
     ln -s /protoc/pbjs /bin/pbjs   &&\
-    ln -s /protoc/pbts /bin/pbts
-
-RUN chmod -R 0777 /protoc
+    ln -s /protoc/pbts /bin/pbts   &&\
+    \
+    chmod -R 0777 /protoc
 
 WORKDIR /mnt
