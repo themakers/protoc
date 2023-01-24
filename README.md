@@ -12,6 +12,7 @@ What's in the package:
 
 Mount your project directory into the container's `/mnt`
 
+# TODO: https://github.com/nipunn1313/mypy-protobuf
 
 - [ ] TODO: Better examples
 - [ ] TODO: Multiple architectures
@@ -27,3 +28,4 @@ docker run --rm -v $PWD:/mnt themakers/protoc:latest protoc --proto_path=proto-d
 ```go
 //go:generate docker run --rm -v $PWD:/mnt themakers/protoc:latest protoc --proto_path=proto-defs --go_out=. --go_opt=paths=source_relative proto-defs/my.proto
 ```
+

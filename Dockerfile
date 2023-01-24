@@ -86,14 +86,14 @@ WORKDIR /protoc
 COPY --from=protoc /protoc /protoc
 
 RUN \
-    apt-get update &&\
+    apt-get update                       &&\
     apt-get install -y curl clang-format &&\
     curl -sL https://deb.nodesource.com/setup_16.x | bash - &&\
-    apt-get install -y nodejs &&\
-    apt-get clean &&\
+    apt-get install -y nodejs   &&\
+    apt-get clean               &&\
     rm -rf /var/lib/apt/lists/* &&\
     \
-    npm install &&\
+    npm install          &&\
     npm run install-hack &&\
     \
     chmod -R +x /protoc/bin  &&\
@@ -101,6 +101,7 @@ RUN \
     mv /protoc/bin/* /bin/    &&\
     mv /protoc/protoc /bin/   &&\
     ln -s /protoc/node_modules/.bin/protoc-gen-connect-web /bin/   &&\
+    ln -s /protoc/node_modules/.bin/protoc-gen-es /bin/            &&\
     ln -s /protoc/node_modules/.bin/protoc-gen-ts /bin/            &&\
     ln -s /protoc/node_modules/.bin/protoc-gen-ts_proto /bin/      &&\
     ln -s /protoc/pbjs /bin/pbjs   &&\
