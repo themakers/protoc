@@ -1,4 +1,0 @@
-#!/usr/bin/env bash
-set -e -x
-
-exec /bin/protoc-original -I/mnt -I/protoc/include -I/protoc/googleapis "$@"

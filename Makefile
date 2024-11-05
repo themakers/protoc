@@ -6,11 +6,15 @@ export BUILDKIT_PROGRESS=plain
 
 .DEFAULT:
 build:
-	# docker buildx create --use --name themakers
-	docker buildx build --rm --progress=plain --builder=themakers --platform linux/amd64,linux/arm64 --file Dockerfile --tag themakers/protoc:latest context
+	docker build --rm \
+		--progress=plain \
+		--tag themakers/protoc:local \
+		--target final \
+		- < Dockerfile
+
 
 run: build
-	docker run --rm -it themakers/protoc:latest /bin/bash
+	docker run --rm -it themakers/protoc:local /bin/sh
 
-publish: build
-	docker image push themakers/protoc:latest
+#publish: build
+#	docker image push themakers/protoc:latest
